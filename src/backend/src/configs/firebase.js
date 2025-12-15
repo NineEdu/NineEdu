@@ -1,11 +1,22 @@
 import admin from "firebase-admin";
-import { createRequire } from "module"; // 1. Import thư viện module của Node
+import { createRequire } from "module";
 
-// 2. Tạo hàm require (vì ES Module không có sẵn require)
 const require = createRequire(import.meta.url);
 
-// 3. Load file JSON bằng require (Sửa đường dẫn thành ./ nếu file nằm cùng thư mục)
-const serviceAccount = require("./serviceAccountKey.json");
+// Support both environment variable (cloud deployment) and local file
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  // Parse JSON from environment variable (for Docker/cloud deployment)
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } catch (error) {
+    console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT environment variable:", error);
+    process.exit(1);
+  }
+} else {
+  // Load from local file (for local development)
+  serviceAccount = require("./serviceAccountKey.json");
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),

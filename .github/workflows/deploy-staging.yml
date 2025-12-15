@@ -1,0 +1,129 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  AZURE_RESOURCE_GROUP: nineedu-staging-rg
+  ACR_NAME: nineedustagingacr
+  ENVIRONMENT: staging
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to Azure Container Registry
+        run: |
+          az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Generate image tag
+        id: meta
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          IMAGE_TAG="${{ env.ENVIRONMENT }}-${SHORT_SHA}-$(date +%s)"
+          echo "tags=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+
+      - name: Build and push backend image
+        run: |
+          docker build \
+            -t ${{ env.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }} \
+            -t ${{ env.ACR_NAME }}.azurecr.io/backend:latest \
+            -f src/backend/Dockerfile \
+            src/backend
+
+          docker push ${{ env.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }}
+          docker push ${{ env.ACR_NAME }}.azurecr.io/backend:latest
+
+      - name: Build and push frontend image
+        run: |
+          docker build \
+            -t ${{ env.ACR_NAME }}.azurecr.io/frontend:${{ env.IMAGE_TAG }} \
+            -t ${{ env.ACR_NAME }}.azurecr.io/frontend:latest \
+            -f src/frontend/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL=https://staging-backend.placeholder.azurecontainerapps.io/api \
+            --build-arg NEXT_PUBLIC_GATEWAY_URL=${{ secrets.NEXT_PUBLIC_GATEWAY_URL }} \
+            --build-arg PINATA_JWT=${{ secrets.PINATA_JWT }} \
+            src/frontend
+
+          docker push ${{ env.ACR_NAME }}.azurecr.io/frontend:${{ env.IMAGE_TAG }}
+          docker push ${{ env.ACR_NAME }}.azurecr.io/frontend:latest
+
+  terraform-deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init
+        working-directory: infrastructure/terraform/environments/staging
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infrastructure/terraform/environments/staging
+        run: |
+          terraform plan \
+            -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
+            -var="mongo_uri=${{ secrets.MONGO_URI_STAGING }}" \
+            -var="jwt_secret=${{ secrets.JWT_SECRET_STAGING }}" \
+            -var="gemini_api_key=${{ secrets.GEMINI_API_KEY }}" \
+            -var="groq_api_key=${{ secrets.GROQ_API_KEY }}" \
+            -var="cloudinary_cloud_name=${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+            -var="cloudinary_api_key=${{ secrets.CLOUDINARY_API_KEY }}" \
+            -var="cloudinary_api_secret=${{ secrets.CLOUDINARY_API_SECRET }}" \
+            -var="firebase_service_account=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" \
+            -var="pinata_jwt=${{ secrets.PINATA_JWT }}" \
+            -var="next_public_gateway_url=${{ secrets.NEXT_PUBLIC_GATEWAY_URL }}" \
+            -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: infrastructure/terraform/environments/staging
+        run: terraform apply -auto-approve tfplan
+
+      - name: Get Application URLs
+        working-directory: infrastructure/terraform/environments/staging
+        run: |
+          terraform output -json > outputs.json
+          echo "Frontend URL: $(terraform output -raw frontend_url)"
+          echo "Backend URL: $(terraform output -raw backend_url)"
+
+      - name: Comment PR with URLs
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const outputs = JSON.parse(fs.readFileSync('infrastructure/terraform/environments/staging/outputs.json'));
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Staging Deployment Complete\n\n` +
+                    `Frontend: ${outputs.frontend_url.value}\n` +
+                    `Backend: ${outputs.backend_url.value}`
+            })

@@ -1,0 +1,29 @@
+# Example Terraform variables for production environment
+# Copy this file to terraform.tfvars and fill in your actual values
+# DO NOT commit terraform.tfvars to Git (it's in .gitignore)
+
+image_tag = "latest"
+
+# MongoDB Atlas connection string (use production cluster)
+mongo_uri = "mongodb+srv://user:password@cluster.mongodb.net/nineedu-production?retryWrites=true&w=majority"
+
+# JWT secret for authentication (generate a DIFFERENT random 32+ character string from staging)
+jwt_secret = "your-production-super-secret-jwt-key-minimum-32-characters-long"
+
+# Google GenAI API key
+gemini_api_key = "your-google-genai-api-key"
+
+# Groq API key
+groq_api_key = "your-groq-api-key"
+
+# Cloudinary credentials
+cloudinary_cloud_name = "your-cloudinary-cloud-name"
+cloudinary_api_key    = "your-cloudinary-api-key"
+cloudinary_api_secret = "your-cloudinary-api-secret"
+
+# Firebase service account JSON (as a single-line string)
+firebase_service_account = "{\"type\":\"service_account\",\"project_id\":\"your-project\",...}"
+
+# Pinata credentials
+pinata_jwt                = "your-pinata-jwt-token"
+next_public_gateway_url   = "https://your-gateway.mypinata.cloud"
