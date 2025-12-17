@@ -11,8 +11,65 @@ env:
   ENVIRONMENT: production
 
 jobs:
+  # First job: Create infrastructure (including ACR)
+  create-infrastructure:
+    runs-on: ubuntu-latest
+    outputs:
+      acr_login_server: ${{ steps.terraform-output.outputs.acr_login_server }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+          terraform_wrapper: false
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init
+        working-directory: infrastructure/terraform/environments/production
+        run: terraform init
+
+      - name: Terraform Plan (Infrastructure Only)
+        working-directory: infrastructure/terraform/environments/production
+        run: |
+          terraform plan \
+            -target=azurerm_resource_group.main \
+            -target=module.container_registry \
+            -target=module.key_vault \
+            -var="image_tag=placeholder" \
+            -var="mongo_uri=${{ secrets.MONGO_URI }}" \
+            -var="jwt_secret=${{ secrets.JWT_SECRET }}" \
+            -var="gemini_api_key=${{ secrets.GEMINI_API_KEY }}" \
+            -var="groq_api_key=${{ secrets.GROQ_API_KEY }}" \
+            -var="cloudinary_cloud_name=${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+            -var="cloudinary_api_key=${{ secrets.CLOUDINARY_API_KEY }}" \
+            -var="cloudinary_api_secret=${{ secrets.CLOUDINARY_API_SECRET }}" \
+            -var="firebase_service_account=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" \
+            -var="pinata_jwt=${{ secrets.PINATA_JWT }}" \
+            -var="next_public_gateway_url=${{ secrets.NEXT_PUBLIC_GATEWAY_URL }}" \
+            -out=tfplan-infra
+
+      - name: Terraform Apply (Create ACR and Key Vault)
+        working-directory: infrastructure/terraform/environments/production
+        run: terraform apply -auto-approve tfplan-infra
+
+      - name: Get ACR Login Server
+        id: terraform-output
+        working-directory: infrastructure/terraform/environments/production
+        run: |
+          ACR_SERVER=$(terraform output -raw container_registry_login_server)
+          echo "acr_login_server=${ACR_SERVER}" >> $GITHUB_OUTPUT
+
+  # Second job: Build and push images (ACR now exists!)
   build-and-push:
     runs-on: ubuntu-latest
+    needs: create-infrastructure
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
 
