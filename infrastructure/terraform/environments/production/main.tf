@@ -26,12 +26,14 @@ provider "azurerm" {
 
 locals {
   environment = "production"
-  location    = "eastus"
+  location    = "southeastasia"  # Optimized for Southeast Asia region
 
   tags = {
     Environment = "production"
     Project     = "NineEdu"
     ManagedBy   = "Terraform"
+    Tier        = "Student"
+    Region      = "Southeast Asia"
   }
 }
 
@@ -46,17 +48,17 @@ resource "azurerm_resource_group" "main" {
 module "container_registry" {
   source = "../../modules/container-registry"
 
-  registry_name       = "nineeduproductionacr"
+  registry_name       = "nineeduacr"
   resource_group_name = azurerm_resource_group.main.name
   location            = local.location
   tags                = local.tags
 }
 
-# Key Vault Module
+# Key Vault Module (Optional - using Terraform variables for simplicity)
 module "key_vault" {
   source = "../../modules/key-vault"
 
-  key_vault_name      = "nineedu-prod-kv"
+  key_vault_name      = "nineedu-kv"
   resource_group_name = azurerm_resource_group.main.name
   location            = local.location
   environment         = local.environment
@@ -112,9 +114,10 @@ module "container_apps" {
     PINATA_JWT              = "pinata-jwt"
   }
 
-  min_replicas           = 2 # Higher minimum for production
-  max_replicas           = 10
-  frontend_max_replicas  = 15
+  # OPTIMIZED FOR STUDENT TIER - Lower scaling
+  min_replicas           = 0  # Scale to zero when not in use (saves $$)
+  max_replicas           = 2  # Lower max for cost control
+  frontend_max_replicas  = 3  # Lower max for cost control
 
   tags = local.tags
 }
@@ -133,4 +136,8 @@ output "backend_url" {
 output "container_registry_login_server" {
   value       = module.container_registry.login_server
   description = "Container Registry login server"
+}
+
+output "cost_optimization_note" {
+  value = "🎓 Student tier optimized: min_replicas=0 means apps scale to zero when idle, saving costs!"
 }

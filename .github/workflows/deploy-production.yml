@@ -7,7 +7,7 @@ on:
 
 env:
   AZURE_RESOURCE_GROUP: nineedu-production-rg
-  ACR_NAME: nineeduproductionacr
+  ACR_NAME: nineeduacr
   ENVIRONMENT: production
 
 jobs:
@@ -31,13 +31,12 @@ jobs:
         id: meta
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          IMAGE_TAG="${{ env.ENVIRONMENT }}-${SHORT_SHA}-$(date +%s)"
+          IMAGE_TAG="prod-${SHORT_SHA}-$(date +%s)"
           echo "tags=${IMAGE_TAG}" >> $GITHUB_OUTPUT
           echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
 
-      - name: Build and push images
+      - name: Build and push backend image
         run: |
-          # Backend
           docker build \
             -t ${{ env.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }} \
             -t ${{ env.ACR_NAME }}.azurecr.io/backend:latest \
@@ -46,7 +45,8 @@ jobs:
           docker push ${{ env.ACR_NAME }}.azurecr.io/backend:${{ env.IMAGE_TAG }}
           docker push ${{ env.ACR_NAME }}.azurecr.io/backend:latest
 
-          # Frontend
+      - name: Build and push frontend image
+        run: |
           docker build \
             -t ${{ env.ACR_NAME }}.azurecr.io/frontend:${{ env.IMAGE_TAG }} \
             -t ${{ env.ACR_NAME }}.azurecr.io/frontend:latest \
@@ -87,8 +87,8 @@ jobs:
         run: |
           terraform plan \
             -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
-            -var="mongo_uri=${{ secrets.MONGO_URI_PRODUCTION }}" \
-            -var="jwt_secret=${{ secrets.JWT_SECRET_PRODUCTION }}" \
+            -var="mongo_uri=${{ secrets.MONGO_URI }}" \
+            -var="jwt_secret=${{ secrets.JWT_SECRET }}" \
             -var="gemini_api_key=${{ secrets.GEMINI_API_KEY }}" \
             -var="groq_api_key=${{ secrets.GROQ_API_KEY }}" \
             -var="cloudinary_cloud_name=${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
@@ -111,6 +111,7 @@ jobs:
           BACKEND_URL=$(terraform output -raw backend_url)
           echo "frontend_url=${FRONTEND_URL}" >> $GITHUB_OUTPUT
           echo "backend_url=${BACKEND_URL}" >> $GITHUB_OUTPUT
+          echo "🎉 Deployment Complete!"
           echo "Frontend: ${FRONTEND_URL}"
           echo "Backend: ${BACKEND_URL}"
 
@@ -123,9 +124,11 @@ jobs:
           tag_name: ${{ needs.build-and-push.outputs.image_tag }}
           release_name: Production Release ${{ needs.build-and-push.outputs.image_tag }}
           body: |
-            Production deployment completed successfully!
+            🎓 **Student Tier Production Deployment**
 
-            Frontend: ${{ steps.terraform-output.outputs.frontend_url }}
-            Backend: ${{ steps.terraform-output.outputs.backend_url }}
+            ✅ Frontend: ${{ steps.terraform-output.outputs.frontend_url }}
+            ✅ Backend: ${{ steps.terraform-output.outputs.backend_url }}
+
+            **Cost Optimization**: Apps scale to zero when idle to save credits!
           draft: false
           prerelease: false
