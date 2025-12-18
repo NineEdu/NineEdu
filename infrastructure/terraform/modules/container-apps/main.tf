@@ -47,7 +47,7 @@ resource "azurerm_container_app" "backend" {
 
   # Define secrets (values from variables)
   dynamic "secret" {
-    for_each = { for k, v in var.secrets : k => v }
+    for_each = nonsensitive(var.secrets)
     content {
       name  = secret.key
       value = secret.value
@@ -117,7 +117,7 @@ resource "azurerm_container_app" "frontend" {
   }
 
   dynamic "secret" {
-    for_each = { for k, v in var.secrets : k => v }
+    for_each = nonsensitive(var.secrets)
     content {
       name  = secret.key
       value = secret.value
