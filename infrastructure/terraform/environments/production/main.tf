@@ -4,7 +4,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+      version = "~> 3.86"
     }
   }
 
@@ -25,7 +25,7 @@ provider "azurerm" {
 
   # Service Principal doesn't have permission to register providers
   # Providers are registered separately using admin account via Azure CLI
-  resource_provider_registrations = "none"
+  skip_provider_registration = true
 }
 
 locals {
