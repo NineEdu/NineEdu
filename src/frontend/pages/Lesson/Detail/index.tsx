@@ -36,9 +36,6 @@ import QuizPlayer from "@/components/QuizPlayer";
 import LessonCommentSection from "./LessonCommentSection";
 import formatDuration from "@/utils/formatDuration";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 export default function LessonPage() {
   const params = useParams();
   const router = useRouter();

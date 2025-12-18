@@ -20,9 +20,6 @@ import useGetCourses from "@/hooks/courses/useGetCourses";
 import { Filter, Loader2, Search, SortAsc, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 const Courses = () => {
   // main state
   const [searchText, setSearchText] = useState("");

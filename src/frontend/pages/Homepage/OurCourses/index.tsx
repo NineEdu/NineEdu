@@ -9,9 +9,6 @@ import React from "react";
 import { Loader2 } from "lucide-react";
 import Link from "next/link"; // Import Link để điều hướng
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 const OurCourses = () => {
   const { data, isFetching: isLoading } = useGetCourses();
 

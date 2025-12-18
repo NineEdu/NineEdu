@@ -24,9 +24,6 @@ interface Enrollment {
   progress: number;
 }
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 export default function StudentCoursesPage() {
   // fetch data
   const { data: enrollments, isLoading } = useGetMyCourses();
