@@ -49,28 +49,28 @@ jobs:
 
       - name: Terraform Plan (Infrastructure Only)
         working-directory: infrastructure/terraform/environments/production
-        run: >
-          terraform plan
-          -target=azurerm_resource_group.main
-          -target=module.container_registry
-          -target=module.key_vault
-          -var="image_tag=placeholder"
-          -var="mongo_uri=${{ secrets.MONGO_URI }}"
-          -var="jwt_secret=${{ secrets.JWT_SECRET }}"
-          -var="gemini_api_key=${{ secrets.GEMINI_API_KEY }}"
-          -var="groq_api_key=${{ secrets.GROQ_API_KEY }}"
-          -var="cloudinary_cloud_name=${{ secrets.CLOUDINARY_CLOUD_NAME }}"
-          -var="cloudinary_api_key=${{ secrets.CLOUDINARY_API_KEY }}"
-          -var="cloudinary_api_secret=${{ secrets.CLOUDINARY_API_SECRET }}"
-          -var="firebase_service_account=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
-          -var="pinata_jwt=${{ secrets.PINATA_JWT }}"
-          -var="next_public_gateway_url=${{ secrets.NEXT_PUBLIC_GATEWAY_URL }}"
-          -out=tfplan-infra
+        run: |
+          terraform plan \
+            -target=azurerm_resource_group.main \
+            -target=module.container_registry \
+            -target=module.key_vault \
+            -out=tfplan-infra
         env:
           ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ env.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ env.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ env.ARM_TENANT_ID }}
+          TF_VAR_image_tag: placeholder
+          TF_VAR_mongo_uri: ${{ secrets.MONGO_URI }}
+          TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+          TF_VAR_gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          TF_VAR_groq_api_key: ${{ secrets.GROQ_API_KEY }}
+          TF_VAR_cloudinary_cloud_name: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          TF_VAR_cloudinary_api_key: ${{ secrets.CLOUDINARY_API_KEY }}
+          TF_VAR_cloudinary_api_secret: ${{ secrets.CLOUDINARY_API_SECRET }}
+          TF_VAR_firebase_service_account: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          TF_VAR_pinata_jwt: ${{ secrets.PINATA_JWT }}
+          TF_VAR_next_public_gateway_url: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL }}
 
       - name: Terraform Apply (Create ACR and Key Vault)
         working-directory: infrastructure/terraform/environments/production
@@ -175,25 +175,23 @@ jobs:
 
       - name: Terraform Plan
         working-directory: infrastructure/terraform/environments/production
-        run: >
-          terraform plan
-          -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}"
-          -var="mongo_uri=${{ secrets.MONGO_URI }}"
-          -var="jwt_secret=${{ secrets.JWT_SECRET }}"
-          -var="gemini_api_key=${{ secrets.GEMINI_API_KEY }}"
-          -var="groq_api_key=${{ secrets.GROQ_API_KEY }}"
-          -var="cloudinary_cloud_name=${{ secrets.CLOUDINARY_CLOUD_NAME }}"
-          -var="cloudinary_api_key=${{ secrets.CLOUDINARY_API_KEY }}"
-          -var="cloudinary_api_secret=${{ secrets.CLOUDINARY_API_SECRET }}"
-          -var="firebase_service_account=${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
-          -var="pinata_jwt=${{ secrets.PINATA_JWT }}"
-          -var="next_public_gateway_url=${{ secrets.NEXT_PUBLIC_GATEWAY_URL }}"
-          -out=tfplan
+        run: terraform plan -out=tfplan
         env:
           ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ env.ARM_CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ env.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ env.ARM_TENANT_ID }}
+          TF_VAR_image_tag: ${{ needs.build-and-push.outputs.image_tag }}
+          TF_VAR_mongo_uri: ${{ secrets.MONGO_URI }}
+          TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+          TF_VAR_gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          TF_VAR_groq_api_key: ${{ secrets.GROQ_API_KEY }}
+          TF_VAR_cloudinary_cloud_name: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          TF_VAR_cloudinary_api_key: ${{ secrets.CLOUDINARY_API_KEY }}
+          TF_VAR_cloudinary_api_secret: ${{ secrets.CLOUDINARY_API_SECRET }}
+          TF_VAR_firebase_service_account: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          TF_VAR_pinata_jwt: ${{ secrets.PINATA_JWT }}
+          TF_VAR_next_public_gateway_url: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL }}
 
       - name: Terraform Apply
         working-directory: infrastructure/terraform/environments/production
