@@ -10,6 +10,11 @@ env:
   ACR_NAME: nineeduacr
   ENVIRONMENT: production
 
+permissions:
+  contents: write
+  packages: read
+  id-token: write
+
 jobs:
   # First job: Create infrastructure (including ACR)
   create-infrastructure:
