@@ -22,6 +22,10 @@ provider "azurerm" {
       purge_soft_delete_on_destroy = false # Keep backups in production
     }
   }
+
+  # Service Principal doesn't have permission to register providers
+  # Providers are registered separately using admin account via Azure CLI
+  resource_provider_registrations = "none"
 }
 
 locals {
