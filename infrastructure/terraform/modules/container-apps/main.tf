@@ -31,6 +31,11 @@ resource "azurerm_container_app" "backend" {
         value = "5002"
       }
 
+      env {
+        name  = "ALLOWED_ORIGINS"
+        value = "https://production-frontend.redmeadow-589599f0.southeastasia.azurecontainerapps.io"
+      }
+
       # Secrets from variables
       dynamic "env" {
         for_each = var.backend_env_vars
