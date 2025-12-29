@@ -15,6 +15,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   }
 } else {
   // Load from local file (for local development)
+  console.log("Loading from serviceAccountKey.json file");
   serviceAccount = require("./serviceAccountKey.json");
 }
 

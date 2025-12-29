@@ -28,6 +28,12 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
   : ['http://localhost:3000'];
 
+// Add the backend URL for Swagger UI
+const backendUrl = `http://localhost:${PORT}`;
+if (!allowedOrigins.includes(backendUrl)) {
+  allowedOrigins.push(backendUrl);
+}
+
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, curl, etc.)

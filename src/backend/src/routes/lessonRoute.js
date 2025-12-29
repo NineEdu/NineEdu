@@ -61,12 +61,45 @@ const identifyUser = async (req, res, next) => {
   }
 };
 
-router.get("/:courseId", identifyUser, getLessonsByCourse);
+router.get("/:courseId", identifyUser,
+  /* #swagger.tags = ['Lessons']
+     #swagger.description = 'Get all lessons for a course' */
+  getLessonsByCourse
+);
 
-router.put("/reorder", protect, isInstructor, updateLessonOrder);
-router.get("/detail/:id", protect, getLessonDetail);
-router.post("/", protect, isInstructor, createLesson);
-router.put("/:id", protect, isInstructor, updateLesson);
-router.delete("/:id", protect, isInstructor, deleteLesson);
+router.put("/reorder", protect, isInstructor,
+  /* #swagger.tags = ['Lessons']
+     #swagger.description = 'Reorder lessons in a course'
+     #swagger.security = [{ "bearerAuth": [] }] */
+  updateLessonOrder
+);
+
+router.get("/detail/:id", protect,
+  /* #swagger.tags = ['Lessons']
+     #swagger.description = 'Get lesson details by ID'
+     #swagger.security = [{ "bearerAuth": [] }] */
+  getLessonDetail
+);
+
+router.post("/", protect, isInstructor,
+  /* #swagger.tags = ['Lessons']
+     #swagger.description = 'Create a new lesson'
+     #swagger.security = [{ "bearerAuth": [] }] */
+  createLesson
+);
+
+router.put("/:id", protect, isInstructor,
+  /* #swagger.tags = ['Lessons']
+     #swagger.description = 'Update a lesson'
+     #swagger.security = [{ "bearerAuth": [] }] */
+  updateLesson
+);
+
+router.delete("/:id", protect, isInstructor,
+  /* #swagger.tags = ['Lessons']
+     #swagger.description = 'Delete a lesson'
+     #swagger.security = [{ "bearerAuth": [] }] */
+  deleteLesson
+);
 
 export default router;

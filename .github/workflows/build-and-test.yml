@@ -23,6 +23,10 @@ jobs:
         working-directory: src/backend
         run: npm ci
 
+      - name: Generate Swagger documentation
+        working-directory: src/backend
+        run: npm run swagger
+
       - name: Run linter (if configured)
         working-directory: src/backend
         run: npm run lint || echo "No lint script found"

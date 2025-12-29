@@ -1,31 +1,28 @@
-import swaggerJsdoc from "swagger-jsdoc";
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-const options = {
-  definition: {
-    openapi: "3.0.0",
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load auto-generated swagger documentation
+const swaggerFile = join(__dirname, 'swagger-output.json');
+let specs = {};
+
+try {
+  const data = readFileSync(swaggerFile, 'utf8');
+  specs = JSON.parse(data);
+} catch (error) {
+  console.warn('⚠️  Swagger documentation not found. Run "npm run swagger" to generate it.');
+  specs = {
+    openapi: '3.0.0',
     info: {
-      title: "NineEdu API Documentation",
-      version: "1.0.0",
-      description: "API documents for LMS system",
+      title: 'NineEdu API',
+      version: '1.0.0',
+      description: 'Run "npm run swagger" to generate documentation'
     },
-    servers: [
-      {
-        url: "http://localhost:5000",
-      },
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-        },
-      },
-    },
-  },
-  apis: ["./routes/*.js", "./models/*.js"],
-};
-
-const specs = swaggerJsdoc(options);
+    paths: {}
+  };
+}
 
 export default specs;
