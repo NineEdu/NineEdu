@@ -6,9 +6,9 @@ const doc = {
     description: 'API documentation for LMS system',
     version: '1.0.0',
   },
-  host: 'localhost:5002',
+  // host and schemes are omitted to auto-detect from current URL
+  // This allows Swagger to work in both local and production environments
   basePath: '/',
-  schemes: ['http'],
   consumes: ['application/json'],
   produces: ['application/json'],
   tags: [
