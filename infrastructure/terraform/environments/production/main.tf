@@ -97,6 +97,9 @@ module "container_apps" {
       "firebase-service-account"   = var.firebase_service_account
       "pinata-jwt"                 = var.pinata_jwt
       "next-public-gateway-url"    = var.next_public_gateway_url
+      "vnp-tmn-code"               = var.vnp_tmn_code
+      "vnp-hash-secret"            = var.vnp_hash_secret
+      "vnp-url"                    = var.vnp_url
     }
   )
 
@@ -110,6 +113,9 @@ module "container_apps" {
     CLOUDINARY_API_KEY         = "cloudinary-api-key"
     CLOUDINARY_API_SECRET      = "cloudinary-api-secret"
     FIREBASE_SERVICE_ACCOUNT   = "firebase-service-account"
+    VNP_TMN_CODE               = "vnp-tmn-code"
+    VNP_HASH_SECRET            = "vnp-hash-secret"
+    VNP_URL                    = "vnp-url"
   }
 
   # Frontend environment variables mapped to secrets

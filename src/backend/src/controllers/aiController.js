@@ -32,7 +32,7 @@ const generateQuizFromText = async (req, res) => {
     // call ai api
     const response = await ai.models.generateContent({
       // specific model version to avoid 404
-      model: "gemini-1.5-flash-001",
+      model: "gemini-3-pro-preview",
       contents: [
         {
           role: "user",

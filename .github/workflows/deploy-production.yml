@@ -76,6 +76,9 @@ jobs:
           TF_VAR_firebase_service_account: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           TF_VAR_pinata_jwt: ${{ secrets.PINATA_JWT }}
           TF_VAR_next_public_gateway_url: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL }}
+          TF_VAR_vnp_tmn_code: ${{ secrets.VNP_TMN_CODE }}
+          TF_VAR_vnp_hash_secret: ${{ secrets.VNP_HASH_SECRET }}
+          TF_VAR_vnp_url: ${{ secrets.VNP_URL }}
 
       - name: Terraform Apply (Create ACR and Key Vault)
         working-directory: infrastructure/terraform/environments/production
@@ -210,6 +213,9 @@ jobs:
           TF_VAR_firebase_service_account: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           TF_VAR_pinata_jwt: ${{ secrets.PINATA_JWT }}
           TF_VAR_next_public_gateway_url: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL }}
+          TF_VAR_vnp_tmn_code: ${{ secrets.VNP_TMN_CODE }}
+          TF_VAR_vnp_hash_secret: ${{ secrets.VNP_HASH_SECRET }}
+          TF_VAR_vnp_url: ${{ secrets.VNP_URL }}
 
       - name: Terraform Apply
         working-directory: infrastructure/terraform/environments/production

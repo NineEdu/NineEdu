@@ -64,3 +64,22 @@ variable "next_public_gateway_url" {
   description = "Pinata Gateway URL"
   type        = string
 }
+
+# VNPay payment gateway variables
+variable "vnp_tmn_code" {
+  description = "VNPay Terminal/Merchant Code"
+  type        = string
+  sensitive   = true
+}
+
+variable "vnp_hash_secret" {
+  description = "VNPay Hash Secret Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "vnp_url" {
+  description = "VNPay Payment Gateway URL"
+  type        = string
+  default     = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+}
