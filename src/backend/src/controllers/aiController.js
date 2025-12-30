@@ -44,7 +44,8 @@ const generateQuizFromText = async (req, res) => {
       },
     });
 
-    const jsonString = response.text();
+    // Access text from response - it's a property, not a method
+    const jsonString = response.text;
 
     // check response
     if (!jsonString) {
